@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: promota-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-promota}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-promota}
+      POSTGRES_DB: ${POSTGRES_DB:-promota}
+    ports:
+      # Host 5432 costuma estar ocupado (outro Postgres/Supabase local nesta máquina)
+      # — usamos 5433 no host para não colidir. Ver docs/DECISIONS.md.
+      - "5433:5432"
+    volumes:
+      - promota_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-promota}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  promota_db_data:
